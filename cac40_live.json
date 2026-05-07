@@ -1,0 +1,31 @@
+{
+  "fetched_at": "2026-04-29 13:37:50",
+  "data": {
+    "MC": {"name": "LVMH", "price": 454.7500, "prev_close": 467.4500, "change": -12.7000, "change_pct": -2.7169, "volume": 507456, "date": "2026-04-28"},
+    "TTE": {"name": "TotalEnergies", "error": "ERR_COLS"},
+    "OR": {"name": "L'Oréal", "price": 373.7000, "prev_close": 373.8000, "change": -0.1000, "change_pct": -0.0268, "volume": 393379, "date": "2026-04-28"},
+    "SAN": {"name": "Sanofi", "price": 78.8900, "prev_close": 78.9000, "change": -0.0100, "change_pct": -0.0127, "volume": 1803983, "date": "2026-04-28"},
+    "SU": {"name": "Schneider Electric", "price": 270.8000, "prev_close": 275.1000, "change": -4.3000, "change_pct": -1.5631, "volume": 835102, "date": "2026-04-28"},
+    "HO": {"name": "Thales", "price": 231.1000, "prev_close": 231.2000, "change": -0.1000, "change_pct": -0.0433, "volume": 190811, "date": "2026-04-28"},
+    "RMS": {"name": "Hermès", "price": 1622.5000, "prev_close": 1658.0000, "change": -35.5000, "change_pct": -2.1411, "volume": 72065, "date": "2026-04-28"},
+    "AI": {"name": "Air Liquide", "error": "ERR_COLS"},
+    "AIR": {"name": "Airbus", "price": 166.1000, "prev_close": 165.5600, "change": 0.5400, "change_pct": 0.3262, "volume": 961853, "date": "2026-04-28"},
+    "SAF": {"name": "Safran", "price": 271.3000, "prev_close": 274.0000, "change": -2.7000, "change_pct": -0.9854, "volume": 627747, "date": "2026-04-28"},
+    "BNP": {"name": "BNP Paribas", "price": 91.5200, "prev_close": 90.1600, "change": 1.3600, "change_pct": 1.5084, "volume": 2464168, "date": "2026-04-28"},
+    "DG": {"name": "Vinci", "price": 128.5500, "prev_close": 127.7500, "change": 0.8000, "change_pct": 0.6262, "volume": 685489, "date": "2026-04-28"},
+    "EL": {"name": "EssilorLuxottica", "price": 182.7000, "prev_close": 186.4500, "change": -3.7500, "change_pct": -2.0113, "volume": 643358, "date": "2026-04-28"},
+    "ACA": {"name": "Crédit Agricole", "price": 17.3100, "prev_close": 17.1350, "change": 0.1750, "change_pct": 1.0213, "volume": 3469128, "date": "2026-04-28"},
+    "CAP": {"name": "Capgemini", "price": 99.2800, "prev_close": 101.6000, "change": -2.3200, "change_pct": -2.2835, "volume": 495938, "date": "2026-04-28"},
+    "DSY": {"name": "Dassault Systèmes", "price": 18.7950, "prev_close": 19.3500, "change": -0.5550, "change_pct": -2.8682, "volume": 1648524, "date": "2026-04-28"},
+    "CS": {"name": "AXA", "price": 40.9800, "prev_close": 40.7700, "change": 0.2100, "change_pct": 0.5151, "volume": 2972677, "date": "2026-04-28"},
+    "BN": {"name": "Danone", "price": 67.4000, "prev_close": 66.5800, "change": 0.8200, "change_pct": 1.2316, "volume": 1301672, "date": "2026-04-28"},
+    "LR": {"name": "Legrand", "price": 147.9000, "prev_close": 150.4500, "change": -2.5500, "change_pct": -1.6949, "volume": 449301, "date": "2026-04-28"},
+    "SGO": {"name": "Saint-Gobain", "price": 77.3400, "prev_close": 77.3600, "change": -0.0200, "change_pct": -0.0259, "volume": 977194, "date": "2026-04-28"},
+    "ML": {"name": "Michelin", "price": 31.4800, "prev_close": 32.0600, "change": -0.5800, "change_pct": -1.8091, "volume": 1868074, "date": "2026-04-28"},
+    "MT": {"name": "ArcelorMittal", "price": 27.1677, "prev_close": 27.1677, "change": 0.0000, "change_pct": 0.0000, "volume": 0, "date": "2018-05-07"},
+    "PUB": {"name": "Publicis", "price": 79.0600, "prev_close": 78.7800, "change": 0.2800, "change_pct": 0.3554, "volume": 495637, "date": "2026-04-28"},
+    "VIE": {"name": "Veolia", "error": "ERR_LINES"},
+    "GLE": {"name": "Société Générale", "error": "ERR_LINES"}
+  },
+  "count": 21
+}

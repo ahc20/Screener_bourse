@@ -1,0 +1,4 @@
+.backups_local/
+*.backup.*
+.DS_Store
+cac40_yahoo*.json

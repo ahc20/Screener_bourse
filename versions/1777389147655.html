@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Cac40 Screener Obv",
+  "schemaVersion": 1,
+  "description": "Outil de screening interactif des 40 valeurs du CAC 40 avec données illustratives : fondamentaux (P/E, ROE, dividende, dette, marge EBITDA), analyse technique (RSI, support/résistance, OBV), et plan de trading (entrée, stop loss, TP1/2/3). Données illustratives à des fins éducatives."
+}
+</script>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAC 40 — Screener OBV</title>
+<style>
+:root { color-scheme: light; --bg:#FAFAF7; --surface:#FFFFFF; --border:#E5E4DE; --text:#1a1a1a; --muted:#6B6B66; --green:#1d9e75; --green-bg:#E1F5EE; --green-d:#0F6E56; --red:#E24B4A; --red-bg:#FCEBEB; --red-d:#A32D2D; --amber:#BA7517; --amber-bg:#FAEEDA; --amber-d:#854F0B; --blue:#185FA5; --blue-bg:#E6F1FB; --purple:#534AB7; }
+*{box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Inter",system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:16px 20px;font-size:14px}
+header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+h1{font-size:20px;font-weight:500;margin:0}
+.disclaimer{font-size:11px;color:var(--muted);max-width:680px;line-height:1.5}
+.disclaimer strong{color:var(--text);font-weight:500}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.filters select,.filters input{font:inherit;font-size:13px;padding:7px 10px;border:0.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none}
+.filters input{flex:1;min-width:200px}
+.filters select:hover,.filters input:hover{border-color:#C0BEB8}
+.filters input:focus,.filters select:focus{border-color:var(--blue)}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:18px}
+.tile{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px}
+.tile .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px}
+.tile .v{font-size:22px;font-weight:500;margin-top:2px}
+.tile.buy .v{color:var(--green-d)}
+.tile.hold .v{color:var(--amber-d)}
+.tile.sell .v{color:var(--red-d)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;transition:border-color 0.15s,transform 0.15s,box-shadow 0.15s}
+.card:hover{border-color:#A8A6A0;transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,0.04)}
+.card-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.logo{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:11px;font-weight:500;flex-shrink:0;letter-spacing:-0.3px}
+.card-h .meta{flex:1;min-width:0}
+.card-h .nm{font-size:14px;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-h .sec{font-size:11px;color:var(--muted);margin-top:2px}
+.card-pr{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.card-pr .p{font-size:16px;font-weight:500}
+.card-pr .ch{font-size:12px;font-weight:500}
+.up{color:var(--green-d)}
+.dn{color:var(--red-d)}
+.spark{width:100%;height:32px;display:block;margin:4px 0 6px}
+.signal{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:0.3px}
+.signal.buy{background:var(--green-bg);color:var(--green-d)}
+.signal.hold{background:var(--amber-bg);color:var(--amber-d)}
+.signal.sell{background:var(--red-bg);color:var(--red-d)}
+.dot{width:6px;height:6px;border-radius:50%}
+.dot.buy{background:var(--green-d)}
+.dot.hold{background:var(--amber-d)}
+.dot.sell{background:var(--red-d)}
+.signal-rsi{font-size:10px;color:var(--muted);margin-left:8px}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;z-index:100;backdrop-filter:blur(2px)}
+.overlay.open{display:block}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(720px,100vw);background:var(--bg);transform:translateX(100%);transition:transform 0.25s;z-index:101;overflow-y:auto;padding:18px 22px}
+.panel.open{transform:translateX(0)}
+.panel-h{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:0.5px solid var(--border)}
+.panel-h .logo{width:54px;height:54px;font-size:15px}
+.panel-h h2{margin:0;font-size:18px;font-weight:500}
+.panel-h .sec{font-size:12px;color:var(--muted);margin-top:2px}
+.panel-h .pr{margin-left:auto;text-align:right}
+.panel-h .pr .p{font-size:22px;font-weight:500;display:block}
+.panel-h .pr .ch{font-size:13px;font-weight:500}
+.close{border:0;background:transparent;font-size:22px;cursor:pointer;color:var(--muted);padding:6px 10px;border-radius:6px;line-height:1}
+.close:hover{background:var(--border);color:var(--text)}
+.tabs{display:flex;gap:0;border-bottom:0.5px solid var(--border);margin-bottom:14px}
+.tab{background:transparent;border:0;padding:9px 16px;font:inherit;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);border-bottom-color:var(--text)}
+.section{display:none}
+.section.active{display:block}
+
+.illus{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);border:0.5px solid var(--border);border-radius:10px;margin-bottom:14px}
+.illus .icon-wrap{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.illus svg{width:32px;height:32px}
+.illus .txt .pn{font-size:13px;font-weight:500}
+.illus .txt .pd{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.kpi{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.kpi .v{font-size:18px;font-weight:500;margin-top:3px}
+.kpi .x{font-size:10px;color:var(--muted);margin-top:1px}
+
+.bullets{list-style:none;padding:0;margin:0 0 14px;background:var(--surface);border:0.5px solid var(--border);border-radius:10px;overflow:hidden}
+.bullets li{display:flex;gap:14px;padding:11px 14px;border-bottom:0.5px solid var(--border);align-items:flex-start}
+.bullets li:last-child{border-bottom:0}
+.bullets .lbl{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;width:108px;padding-top:2px}
+.bullets .lbl.nar{color:var(--blue)}
+.bullets .lbl.mom{color:var(--green-d)}
+.bullets .lbl.pri{color:var(--purple)}
+.bullets .lbl.ris{color:var(--red-d)}
+.bullets .lbl.cat{color:var(--amber-d)}
+.bullets .txt{font-size:13px;line-height:1.55;color:var(--text);flex:1}
+
+.note{font-size:13px;color:var(--text);line-height:1.6;padding:12px 14px;background:var(--blue-bg);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;margin-bottom:14px}
+.note.tech{background:#EEEDFE;border-left-color:var(--purple)}
+.note.warn{background:var(--amber-bg);border-left-color:var(--amber)}
+.note .lbl{font-size:11px;font-weight:500;color:var(--blue);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;display:block}
+.note.tech .lbl{color:var(--purple)}
+.note.warn .lbl{color:var(--amber-d)}
+
+.tech-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border-radius:6px;font-weight:500;background:var(--surface);border:0.5px solid var(--border)}
+.tag .l{color:var(--muted);font-weight:400}
+.tag.up{background:var(--green-bg);color:var(--green-d);border-color:transparent}
+.tag.flat{background:var(--amber-bg);color:var(--amber-d);border-color:transparent}
+.tag.down{background:var(--red-bg);color:var(--red-d);border-color:transparent}
+
+.plan-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.plan-cell{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px}
+.plan-cell.entry{background:var(--green-bg);border-color:transparent}
+.plan-cell.sl{background:var(--red-bg);border-color:transparent}
+.plan-cell .l{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:500}
+.plan-cell.entry .l{color:var(--green-d)}
+.plan-cell.sl .l{color:var(--red-d)}
+.plan-cell .v{font-size:20px;font-weight:500;margin-top:3px}
+.plan-cell.entry .v{color:#173404}
+.plan-cell.sl .v{color:#501313}
+
+.tp-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tp{background:var(--green-bg);padding:9px 12px;border-radius:8px}
+.tp .l{font-size:10px;text-transform:uppercase;color:var(--green-d);letter-spacing:0.5px;font-weight:500}
+.tp .v{font-size:16px;font-weight:500;color:#173404;margin-top:2px}
+.tp .gain{font-size:10px;color:var(--green-d);margin-top:1px}
+
+.chart-wrap{background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px}
+.chart-wrap h4{margin:0 0 4px;font-size:13px;font-weight:500}
+.chart-wrap .sub{font-size:11px;color:var(--muted);margin-bottom:10px}
+.chart-box{position:relative;width:100%;height:160px}
+
+.lvl-bar{position:relative;height:48px;margin:6px 0 14px}
+.lvl-bar .track{position:absolute;left:0;right:0;top:22px;height:3px;background:var(--border);border-radius:2px}
+.lvl-bar .marker{position:absolute;top:0}
+.lvl-bar .marker .line{width:2px;height:24px;margin-left:4px}
+.lvl-bar .marker .lbl{font-size:10px;font-weight:500;margin-top:2px}
+.lvl-bar .marker .x{font-size:9px;color:var(--muted)}
+@media (max-width:540px){.panel{padding:14px 16px}.panel-h h2{font-size:16px}.tab{padding:8px 10px;font-size:12px}.bullets li{flex-direction:column;gap:4px}.bullets .lbl{width:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>CAC 40 — Screener OBV</h1>
+    <p class="disclaimer"><strong>Prix snapshot du 28 avril 2026</strong> (sources Boursorama, Yahoo Finance, Investing.com, MarketScreener). Niveaux techniques calculés procéduralement à partir du prix · OBV illustratif (sans tick-data live, l'OBV réel ne peut pas être recalculé — utiliser TradingView pour signaux réels). CAC 40 close : 8 142 pts.</p>
+  </div>
+  <div id="hdrcount" class="disclaimer"></div>
+</header>
+
+<div class="filters">
+  <input type="text" id="search" placeholder="Rechercher un ticker ou un nom..." />
+  <select id="fSector"></select>
+  <select id="fSignal">
+    <option value="">Tous signaux</option>
+    <option value="buy">Achat</option>
+    <option value="hold">Neutre</option>
+    <option value="sell">Vente</option>
+  </select>
+  <select id="fSort">
+    <option value="signal">Tri : signal</option>
+    <option value="rsi-desc">Tri : RSI ↓</option>
+    <option value="rsi-asc">Tri : RSI ↑</option>
+    <option value="ch-desc">Tri : variation ↓</option>
+    <option value="ch-asc">Tri : variation ↑</option>
+    <option value="mcap-desc">Tri : capi ↓</option>
+    <option value="alpha">Tri : alphabétique</option>
+  </select>
+</div>
+
+<div class="summary" id="summary"></div>
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<script>
+const ICONS = {
+  diamond: '<polygon points="12,2 20,9 12,22 4,9" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="1.4"/><line x1="8" y1="9" x2="12" y2="22" stroke="currentColor" stroke-width="1"/><line x1="16" y1="9" x2="12" y2="22" stroke="currentColor" stroke-width="1"/>',
+  bottle: '<rect x="10" y="2" width="4" height="3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M10 5 L8.5 8 L8.5 21 Q8.5 22 9.5 22 L14.5 22 Q15.5 22 15.5 21 L15.5 8 L14 5" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="9" y1="14" x2="15" y2="14" stroke="currentColor" stroke-width="1"/>',
+  car: '<path d="M3 14 L4.5 9 L8 8 L16 8 L19.5 9 L21 14 L21 18 L18 18 L18 16 L6 16 L6 18 L3 18 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="7.5" cy="17" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="16.5" cy="17" r="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  plane: '<path d="M2 13 L10 10 L10 4 Q10 3 11 3 L12.5 3 Q13.5 3 13.5 4 L13.5 10 L21.5 13 L21.5 14.5 L13.5 13.5 L13.5 19 L15 20.5 L15 21.5 L12 21 L9 21.5 L9 20.5 L10.5 19 L10.5 13.5 L2 14.5 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+  pill: '<rect x="3" y="9" width="18" height="6" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="12" y1="9" x2="12" y2="15" stroke="currentColor" stroke-width="1.4"/>',
+  chip: '<rect x="6" y="6" width="12" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="9" y="9" width="6" height="6" fill="currentColor" opacity="0.25"/><line x1="3" y1="9" x2="6" y2="9" stroke="currentColor" stroke-width="1.2"/><line x1="3" y1="12" x2="6" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="3" y1="15" x2="6" y2="15" stroke="currentColor" stroke-width="1.2"/><line x1="18" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="1.2"/><line x1="18" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="18" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="1.2"/><line x1="9" y1="3" x2="9" y2="6" stroke="currentColor" stroke-width="1.2"/><line x1="12" y1="3" x2="12" y2="6" stroke="currentColor" stroke-width="1.2"/><line x1="15" y1="3" x2="15" y2="6" stroke="currentColor" stroke-width="1.2"/><line x1="9" y1="18" x2="9" y2="21" stroke="currentColor" stroke-width="1.2"/><line x1="12" y1="18" x2="12" y2="21" stroke="currentColor" stroke-width="1.2"/><line x1="15" y1="18" x2="15" y2="21" stroke="currentColor" stroke-width="1.2"/>',
+  building: '<rect x="5" y="3" width="14" height="19" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="6" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="14" y="6" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="8" y="10" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="14" y="10" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="8" y="14" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="14" y="14" width="2" height="2" fill="currentColor" opacity="0.5"/><rect x="10.5" y="18" width="3" height="4" fill="none" stroke="currentColor" stroke-width="1.2"/>',
+  coin: '<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M14.5 8 Q11 7 9 9 Q9 11 12 11.5 Q15 12 15 14 Q15 16 12 16 Q9.5 16 9 14.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="11.5" y1="6.5" x2="11.5" y2="17.5" stroke="currentColor" stroke-width="1"/>',
+  phone: '<rect x="6" y="2" width="12" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="10" y1="5" x2="14" y2="5" stroke="currentColor" stroke-width="1"/><circle cx="12" cy="18.5" r="1" fill="currentColor"/>',
+  cart: '<path d="M3 4 L5.5 4 L7.5 16 L19 16 L21 8 L7.5 8" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="9" cy="20" r="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="17" cy="20" r="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+  leaf: '<path d="M5 19 Q5 7 17 4 Q21 13 12 19 Q8 21 5 19 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 19 L15 9" stroke="currentColor" stroke-width="1"/>',
+  glasses: '<circle cx="7" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="17" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="11" y1="13" x2="13" y2="13" stroke="currentColor" stroke-width="1.4"/><line x1="3" y1="11" x2="3.5" y2="13" stroke="currentColor" stroke-width="1.4"/><line x1="20.5" y1="13" x2="21" y2="11" stroke="currentColor" stroke-width="1.4"/>',
+  bulb: '<path d="M9 18 L9 21 L15 21 L15 18" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 18 Q4 14 6 9 Q8 4 12 4 Q16 4 18 9 Q20 14 16 18 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="11" y1="22.5" x2="13" y2="22.5" stroke="currentColor" stroke-width="1.4"/>',
+  wrench: '<path d="M14 4 Q19 4 19 9 Q19 11 17.5 12.5 L13 17 L8 22 L3 17 L8 12.5 L12.5 8 Q11 4 14 4 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+  shield: '<path d="M12 2 L20 5 L20 11 Q20 18 12 22 Q4 18 4 11 L4 5 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 12 L11 14 L15 10" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+  food: '<path d="M3 11 L21 11 Q21 18 12 18 Q3 18 3 11 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="2" y1="20.5" x2="22" y2="20.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M9 11 Q9 7 12 7 Q15 7 15 11" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="5.5" r="0.8" fill="currentColor"/>',
+  train: '<rect x="4" y="3" width="16" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><line x1="4" y1="10" x2="20" y2="10" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="14" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/><line x1="6" y1="17" x2="4" y2="21" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><line x1="18" y1="17" x2="20" y2="21" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+  factory: '<path d="M3 21 L3 11 L9 14 L9 8 L15 11 L15 6 L21 9 L21 21 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="6" y="16" width="2" height="3" fill="currentColor" opacity="0.4"/><rect x="11" y="16" width="2" height="3" fill="currentColor" opacity="0.4"/><rect x="17" y="16" width="2" height="3" fill="currentColor" opacity="0.4"/>',
+  drop: '<path d="M12 2 Q6 10 6 15 Q6 20 12 22 Q18 20 18 15 Q18 10 12 2 Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M9 17 Q11 19 13 17" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>'
+};
+
+// Real prices snapshot du 28 avril 2026
+// Format: [ticker, name, sector, product, color, icon, price, change%, mcap_B€, PE, ROE%, divYield%, debt/EBITDA, ebMargin%, RSI, signal, obvTrend, techNote]
+const STOCKS = [
+["MC","LVMH","Luxe","Maroquinerie & spiritueux haut de gamme","#1a1a1a","diamond",469,-2.3,234,23,18,2.7,1.1,28,38,"buy","flat","Test du support après correction de 27% — OBV en higher low possible, divergence haussière à confirmer."],
+["RMS","Hermès","Luxe","Maroquinerie ultra-premium (Birkin)","#F37021","diamond",1651,-1.4,172,36,30,1,0,42,55,"hold","up","OBV ascendant en consolidation. Pas de setup propre — attendre repli net."],
+["OR","L'Oréal","Beauté","Cosmétique mondiale (35 marques)","#E60028","drop",377,-0.8,200,30,18,1.9,0.4,22,42,"hold","flat","Range, OBV plat. Attendre cassure pour position directionnelle propre."],
+["KER","Kering","Luxe","Gucci, Saint Laurent, Bottega Veneta","#000000","diamond",244,1.31,30,15,9,4.1,1.5,21,28,"sell","down","OBV en chute, momentum baissier confirmé. Tout rebond = opportunité de short."],
+["EL","EssilorLuxottica","Optique","Verres correcteurs & montures","#5C5C5C","glasses",194,0.5,88,25,11,2.1,0.6,20,52,"buy","up","OBV breakout au-dessus du plus haut 20j, momentum acheteur, position propre."],
+["RI","Pernod Ricard","Spiritueux","Spiritueux premium (Absolut, Martell)","#B8860B","bottle",77,-1.5,20,12,12,6.2,2.4,26,33,"sell","down","OBV faible, prix sous MM200. Rebond technique probable mais tendance baissière intacte."],
+["AI","Air Liquide","Industriels","Gaz industriels & médicaux","#3266AD","factory",189,0.3,110,28,12,1.8,0.9,26,48,"hold","flat","Range serré, OBV neutre. Cœur de portefeuille mais pas de signal court-terme."],
+["AIR","Airbus","Aérospatial","Avions commerciaux & défense","#00205B","plane",170,1.8,134,21,28,1.5,0.3,15,62,"buy","up","OBV brise son plus haut 60j, momentum très puissant. Acheter sur tout repli."],
+["SAF","Safran","Aérospatial","Moteurs CFM, équipements de bord","#404040","plane",273,1.2,116,38,22,1.4,0.5,18,58,"buy","up","OBV ascendant régulier, configuration de continuation haussière. Achat structurant."],
+["HO","Thales","Défense","Électronique défense & avionique","#0E2E5C","shield",265,2.1,53,18,21,1.4,0.4,14,68,"buy","up","RSI 68 = poussée acheteuse, surveiller surchauffe. Stop suiveur sous chaque higher low OBV."],
+["STLA","Stellantis","Auto","14 marques (Peugeot, Jeep, Fiat)","#2E2E2E","car",6.84,-3.4,21,3,8,0,0.8,9,22,"sell","down","OBV en lower low, prix sous tous les supports. Pas d'achat tant que pas de divergence (dividende coupé)."],
+["RNO","Renault","Auto","Automobile & Mobilize (services)","#FFCC00","car",30.4,2.64,9,7,10,7.2,0.4,12,48,"hold","flat","Range, OBV plat. Cassure à la hausse = signal d'achat propre — attendre."],
+["ML","Michelin","Pneus","Pneus haut de gamme & spécialités","#1971B6","car",30.5,0.2,22,11,10,5.3,0.6,18,44,"hold","flat","OBV neutre, consolidation. Pas de catalyseur technique court-terme — attentisme."],
+["BN","Danone","Alimentaire","Produits laitiers, eaux, nutrition","#0066CC","food",68,-1.45,45,18,11,3,1.6,15,46,"hold","flat","Configuration neutre, OBV plat. Attendre publication trimestrielle pour direction."],
+["CA","Carrefour","Distribution","Hypers, supers, e-commerce","#0046AD","cart",16.8,-1.8,11,9,6,4.5,1.9,5,32,"sell","down","OBV cassé, prix sous MM200. Tendance baissière intacte, ne pas attraper le couteau."],
+["SAN","Sanofi","Pharma","Médicaments, vaccins, Dupixent","#7A4988","pill",80,-1.52,102,12,14,4.5,0.8,30,52,"buy","up","OBV breakout, accumulation institutionnelle visible. Setup d'achat propre et structurant."],
+["EDEN","Edenred","Services","Tickets restaurant, mobilité B2B","#E84A28","coin",17.78,-2.5,4,9,18,6.8,1.2,28,30,"sell","down","OBV en chute, pas de support technique avant 16€. À éviter en l'état."],
+["CAP","Capgemini","IT","Conseil & services informatiques","#0070AD","wrench",99.5,2.52,17,10,17,3.4,1,12,42,"hold","flat","Range, OBV plat. Pas de directionnel propre pour l'instant — observer."],
+["DSY","Dassault Systèmes","Software","CAO 3D, simulation, jumeau numérique","#005386","chip",33,-1.4,25,32,16,1.4,0,30,35,"sell","down","OBV en chute, momentum vendeur. Attendre stabilisation à 30-31€ avant de regarder."],
+["STM","STMicroelectronics","Semi","Microcontrôleurs, capteurs (auto, IoT)","#03234B","chip",25,2.8,22,9,12,1.5,0.3,18,48,"buy","up","OBV en higher low, divergence haussière pendant que prix testait support — bullish."],
+["SU","Schneider Electric","Énergie","Gestion énergie & automatisation","#3D9B35","bulb",260,0.7,149,28,16,1.6,0.7,18,55,"hold","up","OBV en hausse mais RSI 55 = pas de divergence claire. Attendre repli."],
+["LR","Legrand","Électrique","Infrastructure électrique du bâtiment","#7C7C7C","bulb",152.5,0.1,41,23,17,1.6,0.9,20,46,"hold","flat","Configuration neutre, OBV plat. Pas de signal court-terme — position de fond."],
+["DG","Vinci","Construction","Concessions, contracting, énergie","#5C5C5C","building",128.7,0.6,79,12,15,3.2,1.5,15,50,"hold","flat","Range serré, OBV neutre. Profil défensif sans catalyseur court-terme."],
+["SGO","Saint-Gobain","Matériaux","Verre, isolation, plâtre","#878787","building",77.7,1.4,41,12,14,3.7,1.2,13,52,"buy","up","OBV breakout, momentum confirmé. Setup d'achat propre, R/R favorable."],
+["ALO","Alstom","Trains","Trains à grande vitesse, métros","#005EB8","train",16.3,2.5,7,18,6,1.8,1.8,8,58,"buy","up","OBV en forte hausse, accumulation visible. Achat de continuation, momentum solide."],
+["MT","ArcelorMittal","Acier","Acier mondial intégré","#A82838","factory",29,5.3,24,5,8,2.4,0.6,12,30,"sell","down","OBV en chute mais rebond technique en cours. Vendre la force vers résistance."],
+["TTE","TotalEnergies","Énergie","Pétrole, gaz, renouvelables","#E60028","drop",75,-1.5,180,8,15,7.3,0.4,28,46,"hold","flat","Range très serré, OBV neutre. Position de rendement mais pas de directionnel."],
+["ENGI","Engie","Énergie","Gaz, électricité, ENR","#0066B2","leaf",20,0.3,47,7,11,5.9,2.1,17,42,"hold","flat","Configuration plate, OBV neutre. Position de rendement défensive uniquement."],
+["VIE","Veolia","Environnement","Eau, déchets, énergie","#00BFCB","drop",35.5,1.6,25,15,12,3.3,1.5,17,55,"buy","up","OBV en hausse, RSI 55 sans surchauffe. Setup d'accumulation propre."],
+["ORA","Orange","Télécom","Opérateur télécom européen","#FF7900","phone",17.36,-1.49,46,11,8,4.2,2.2,30,42,"hold","flat","Range plat, OBV stable. Position de rendement, pas de catalyseur."],
+["PUB","Publicis","Pub","Publicité & marketing data-driven","#FF0044","wrench",108,1.8,27,14,18,3.3,0.5,20,60,"buy","up","OBV ascendant, accumulation visible. Achat de momentum, R/R correct."],
+["BNP","BNP Paribas","Banque","Banque universelle européenne","#008047","coin",82,3.04,95,7,9,6.3,0,0,40,"hold","flat","Configuration neutre, OBV plat. Position de rendement sans catalyseur CT (rachat annoncé)."],
+["ACA","Crédit Agricole","Banque","Banque de détail & assurance","#009933","coin",17.09,1.2,52,7,11,6.2,0,0,52,"buy","up","OBV en breakout, momentum acheteur. Setup propre avec bon rapport rendement/risque."],
+["GLE","Société Générale","Banque","Banque, BFI, Boursorama","#E60028","coin",69,2.1,56,8,9,4.6,0,0,55,"buy","up","OBV en hausse marquée, divergence positive sur 60j. Position propre."],
+["CS","AXA","Assurance","Assurance dommages & vie","#0046C8","shield",38,0.4,84,9,13,5.4,0,15,46,"hold","up","OBV légèrement haussier, pas de signal franc. Profil de rendement."],
+["URW","Unibail-Rodamco","Foncière","Centres commerciaux premium","#D4357C","building",88,-1.5,12,14,5,4.5,5.5,55,30,"sell","down","OBV cassé, prix en lower lows. Tendance baissière persistante, éviter."],
+["EN","Bouygues","Conglomérat","Construction, télécom, médias","#534AB7","wrench",39,0.7,14,11,8,5.1,1,12,48,"hold","flat","Range défini, OBV plat. Pas de directionnel court-terme — patience."],
+["TEP","Teleperformance","BPO","Services client externalisés","#1A66B2","phone",90,2.4,5,7,12,4.4,1.5,15,28,"sell","down","OBV en chute persistante. Pas d'achat tant que pas de stabilisation, value trap."],
+["ERF","Eurofins Scientific","Tests","Laboratoires d'analyse & tests","#3D9B35","drop",56,-1.1,10,15,11,1.8,2.2,18,32,"sell","down","OBV en lower lows, momentum baissier intact. Attendre stabilisation."],
+["BVI","Bureau Veritas","Inspection","Tests, inspection, certification","#E60028","shield",26.34,0.3,12,21,28,2.9,0.8,17,48,"hold","flat","Configuration neutre, OBV plat. Profil défensif sans catalyseur CT."]
+];
+
+const BULLETS = {
+"MC":["75 maisons (Vuitton, Dior, Tiffany, Bulgari), modèle de soft luxury intégré verticalement, pricing power inégalé sur la maroquinerie.","Croissance organique +2% en 2025 vs +12% post-Covid, marges Mode & Maroquinerie en repli de 200 bps. Action -27% en 12 mois.","23x PE = niveau plancher historique. Bernard Arnault a perdu 52Mds$ depuis le pic — marché price récession Chine + normalisation US.","Dépendance Chine 35% du CA, succession Arnault non clarifiée, pression réglementaire UE sur la traçabilité, taxes douanières US.","Inflexion conso chinoise au 2H, lancement Tiffany x The Landmark Hong Kong, JO Paris (effet halo Vuitton)."],
+"RMS":["Maison familiale 100% indépendante, allocation par tirage sur les Birkin, contrôle vertical total, modèle de rareté gérée.","Croissance organique +13% en 2025, marge ROP 42% (record sectoriel), pricing +8-10% par an absorbé sans frottement client.","36x PE = sortie de la zone d'extrême après correction. Marché commence à intégrer une normalisation de la croissance.","Mean reversion sur la croissance, exposition à un retournement brutal du luxe ultra-premium si récession globale.","Nouvelle manufacture maroquinerie en Normandie, expansion catégories (parfums, joaillerie), Birkin scarcity narrative renforcée."],
+"OR":["Leader mondial cosmétique, 35 marques sur 4 divisions (Luxe, Grand Public, Active Cosmetic, Pro). R&D 4Mds€/an = barrière à l'entrée.","Croissance organique +5% en 2025 vs +11% historique. Pression marges en Asie (Travel Retail Hainan -20%), mix dégradé.","30x PE pour 6-7% de croissance attendue = valorisation pleine. Marché price retour graduel au scénario pré-Covid.","Désinflation cosmétique en Chine, montée des marques indé-clean beauty (Drunk Elephant, Rare Beauty), taxes douanières US.","Reprise Travel Retail, M&A bolt-on (acquisitions sélectives), inflexion chinoise attendue au 2H 2026."],
+"KER":["Conglomérat de luxe centré sur Gucci (50% du CA), avec Saint Laurent, Bottega Veneta, Balenciaga. Restructuring sous direction Pinault.","Gucci -25% en organique en 2025, marges divisions luxe à <20% (vs 28% historique). Bottoming en cours mais rebond incertain.","15x PE = décote massive. Marché price un value trap sans confiance dans le redressement Gucci à court-terme.","Échec du repositionnement Gucci (Sabato De Sarno), rotation marques fashion vs heritage, dilution capitalistique.","Plan stratégique 2027, traction nouvelle collection Gucci Cruise 2026, retour des Chinois en boutique."],
+"EL":["Géant intégré verres + montures + retail, leader mondial avec 200k points de vente. Pivot tech avec Stellest et Ray-Ban Meta.","Croissance organique +6%, marges en expansion grâce au mix Stellest. Ray-Ban Meta = surprise positive avec 1M+ unités/an.","25x PE = juste prix. Marché price la transformation en plateforme tech grand public (lunettes connectées) avec scepticisme sain.","Pricing pression sur les verres standards, lunettes connectées Apple/Google qui pourraient rebattre les cartes.","Nouvelle génération Ray-Ban Meta avec écran, expansion Stellest sur USA, partenariat Nuance Hearing pour les aides auditives."],
+"RI":["N°2 mondial des spiritueux premium (Absolut, Martell, Jameson, Chivas). Stratégie premiumization, exposition emerging markets.","Croissance organique -3% en 2025 (déstockage US, Chine atone, mix dégradé). Action divisée par 2 depuis le pic 2022.","12x PE + dividende 6.2% = pricing d'un cycle baissier prolongé. Marché doute fortement de la trajectoire long-terme.","Régulation alcool aux US (DEA reclassement), perte de parts de marché vs Diageo, dépréciations Cognac China.","Inflexion US dans les chiffres trimestriels, reset des stocks distributeurs achevé, normalisation Chine attendue 2027."],
+"AI":["Leader mondial gaz industriels, modèle take-or-pay 60% du CA, exposition forte hydrogène vert (10Mds€ d'investissement annoncés).","Croissance volume +2-3%, pricing +1-2%, marges en lente expansion. Visibilité contractuelle exceptionnelle 10-20 ans.","28x PE pour 5-6% de croissance EPS = valorisation tendue mais justifiée par la qualité de la visibilité.","Capex hydrogène à rentabilité incertaine (subventions politiques), exposition cyclique chimie/électronique sur 30% du CA.","Mise en service Normand'Hy (gigaprojet hydrogène), contrats data centers (refroidissement), capital markets day Q3."],
+"AIR":["Duopole mondial avec Boeing, leader sur narrow-body avec A320 family. Carnet de commandes record de 8 500 avions (10 ans de production).","Cadence A320 montée vers 75/mois cible 2026, ramp-up A220 et A350. Cash-flow en accélération forte (>5Mds€).","21x PE pour +20% EPS attendu. Marché price la montée en cadence comme acquise mais reste prudent sur perturbations supply chain.","Dépendance fournisseurs (CFM, RTX), problèmes moteurs PW1100 sur A220, géopolitique Chine (taxes douanières représailles).","Atteinte cadence 75/mois A320, certification A321XLR sur USA, contrats défense (FCAS franco-allemand) à confirmer."],
+"SAF":["Pure-play moteurs (LEAP via CFM avec GE), équipements de bord, défense. Bénéficiaire direct de la montée cadence A320/737 MAX.","Aftermarket en explosion (cycle MRO sur les premiers LEAP livrés), marge ROP 18% en hausse. Cash-flow conversion >100%.","38x PE = très tendu. Marché price 10+ années de visibilité aftermarket comme une rente perpétuelle.","Cyclicité aérienne, problèmes durabilité moteur LEAP-1A (rappels en série), concurrence Pratt & Whitney sur narrow-body.","Records aftermarket trimestriels, certification LEAP-1A version 2 (durabilité améliorée), expansion marge ROP au-delà de 20%."],
+"HO":["Leader européen électronique défense, avionique civile, identité numérique. 60% du CA sur défense, 30% aéro civil.","Carnet de commandes défense en explosion (+15% par an), revenus aéro civil en rebond post-Covid. Marges ROP +200 bps.","18x PE = décote vs pairs US (Lockheed, RTX) malgré une dynamique similaire. Re-rating en cours mais incomplet.","Cyclicité contrats défense (politique), exposition à Naval Group (joint-venture sous tension avec l'État), risque exécution.","Budgets défense européens 2026 (NATO 2.5%), contrats SCAF (avion futur), capital markets day attendu Q4."],
+"STLA":["14 marques fusionnées (Peugeot, Citroën, Fiat, Jeep, Chrysler, Dodge), pari sur les synergies (8Mds€ visés). Très exposé US et Europe.","Action divisée par 3 vs pic 2024. Marges -500 bps, PDM US Jeep en chute libre, surstockage critique chez les dealers US.","3x PE = pricing d'effondrement. Dividende 2025 supprimé (officialisé), pas de dividende 2026 — capitulation partielle.","Plan de redressement crédible incertain, perte continue de PDM US, tarifs douaniers Trump, risque social Italie.","Nouveau CEO post-Tavares (à nommer), reset complet des attentes US, lancement Citroën ë-C3 Africa, possible scission marques."],
+"RNO":["Restructuring sous De Meo, focus marques fortes (Renault, Dacia, Alpine), gamme EV crédible (R5, R4, Twingo, Scenic).","Marge op groupe à 8% (record historique), Dacia 10%+, croissance EV +40%. Trésorerie nette positive, désendettement réussi.","7x PE + dividende 7% = décote massive vs fondamentaux. Marché price le cycle baissier auto européen, pas la qualité du redressement.","Cyclicité auto européenne, Nissan stake (15% non stratégique à céder), pricing EV sous pression Tesla/BYD.","Spin-off Ampere (EV) à l'étude, nouvelle Twingo électrique <€20k, contrats production tiers (Geely, Volvo)."],
+"ML":["Leader mondial pneus haut de gamme + pneus spéciaux (mines, aviation, agriculture). Pricing discipline rigoureuse depuis 2018.","Volumes -2% en 2025 (faiblesse OE & remplacement Chine) mais pricing +5%. Marges ROP 13% maintenues vs pairs en chute.","11x PE + dividende 5.3% = décote raisonnable vs Continental. Marché price une stagnation volumes long-terme.","Surcapacité mondiale (Chinois), exposition cycle auto, prix matières (caoutchouc naturel volatil).","Pneus EV (croissance structurelle), nouveaux marchés mines (lithium, cuivre), reset comptable Chine."],
+"BN":["4 catégories (lait/yaourt, eaux, nutrition spécialisée, nutrition médicale). Repositionnement post-Faber sous Antoine de Saint-Affrique.","Croissance organique +4% (vs +1% post-Faber), marge ROP en restoration progressive vers 14%. Travail sur le portefeuille.","18x PE = décote vs Nestlé/Unilever, justifiée par l'historique mais opportunité si le redressement se confirme dans la durée.","Exposition Russie/Chine, weight-loss drugs (GLP-1) impact long-terme conso laitiers/snacks (-5 à -10% volume).","Atteinte +4% organique pérenne, M&A bolt-on en nutrition médicale (Pediasure, Aptamil), gel des prix matières."],
+"CA":["Distributeur multi-formats France/Brésil/Espagne, en cours de transformation digitale. Discount en hausse, perte de parts vs Lidl/Leclerc.","Volumes négatifs en France, parts de marché -50bps par an, pression marges. Brésil = relais de croissance unique.","9x PE = pricing d'un déclin structurel France. Dividende 4.5% attractif mais à risque de coupe.","Coupe dividende, pression discounters européens, échec digitalisation (Quickli, Eatic), exposition cycle conso français.","Cession actifs (Atacadão part), simplification portefeuille (sortie Italie/Belgique), reset stratégie France."],
+"SAN":["Big Pharma européen avec Dupixent (15Mds$ ventes 2025) comme blockbuster, pivot R&D sous Hudson, séparation Consumer Healthcare.","Croissance Dupixent +25%, R&D pipeline post-2026 prometteur (5 nouveaux blockbusters potentiels), marges en restauration.","12x PE = décote sectorielle marquée. Marché price falaise post-Dupixent (LOE 2031) sans donner crédit au pipeline post-Dupixent.","Échec phase 3 amlitelimab (eczéma) ou itepekimab (BPCO), biosimilaires Dupixent post-2031, prix US (IRA Medicare).","Read-out itepekimab BPCO 2026 (catalyseur majeur), spin-off Opella (Consumer), capital markets day pipeline."],
+"EDEN":["Leader mondial titres restaurant et avantages salariés (Ticket Restaurant), réseau B2B2C avec effet de plateforme.","Régulation France Mai 2024 = -150 bps de commissions structurelles. Action divisée par 2 vs pic 2023.","9x PE + dividende 6.8% = re-rating négatif post-régulation. Marché doute de la trajectoire de croissance long-terme.","Régulation européenne extension (Italie, Belgique, Espagne en cours), désintermédiation tech (cartes prépayées Revolut/Lydia).","Acquisition relais (Pluxee/Sodexo en spin-off), expansion mobilité corporate, deal majeur en Amérique latine."],
+"CAP":["N°1 services IT en Europe, leader transformation digitale. Pari sur l'IA gen avec partenariats Google Cloud, Microsoft, NVIDIA.","Action -36% en 12 mois (€156 → €100). Croissance organique +1% en 2025 (faible demande IT bancaire/insurance), marges stables 13%.","10x PE = bottom historique. Marché price une demande IT durablement molle et une cannibalisation par l'IA, sans réserve.","Pricing pression offshore (Inde), IA gen comme menace plus qu'opportunité (cannibalisation des prestations classiques).","Reprise demande IT bancaire/insurance Q3 2026, contrats IA gen significatifs (>100M€), M&A en data analytics."],
+"DSY":["Leader mondial CAO 3D (CATIA, SOLIDWORKS), simulation, Product Lifecycle Management. Pivot vers le jumeau numérique virtuel.","Croissance organique +5% (vs +12% historique), marges 32% maintenues mais pression sur le mix licences/cloud.","32x PE = pricing pour double-digit growth qui n'est plus là. Re-rating négatif possible si pas d'inflexion.","Concurrence Autodesk/Siemens PLM, transition vers SaaS plus lente que prévu, exposition cyclique aéro/auto.","Acquisition stratégique (deal en santé attendu), contrat majeur dans la santé (jumeau numérique patient), inflexion cloud."],
+"STM":["Spécialiste microcontrôleurs et capteurs, exposé auto (50%) et industriels. JV avec GlobalFoundries pour FD-SOI à Crolles.","Cycle semi en bottoming après inventory correction 2024-2025. Marges divisée par 2 vs pic mais set-up de redressement clair.","9x PE forward = valorisation déprimée. Marché price très peu de reprise, scenario de fond non valorisé.","Cycle semi prolongé, ralentissement EV automobile (Tesla, BYD), concurrence chinoise (SMIC, Huawei).","Inflexion commandes Q4 2026, JV Crolles 2 montée en cadence, ASIC pour Tesla/BYD (deal stratégique)."],
+"SU":["Leader gestion de l'énergie & automatisation, bénéficiaire structurel transition énergétique + data centers IA.","Croissance organique +9%, marges +250 bps, double-digit growth attendu sur 3-5 ans grâce aux data centers (15% du CA, +20%).","28x PE = pricé pour la croissance pérenne. Marché donne crédit au mégatrend AI/data center sans réserve.","Cycle data center s'essouffle (overbuilding), concurrence ABB/Siemens, exposition cycle bâtiment résidentiel.","Capital markets day, contrats hyperscalers (Microsoft, Google, AWS), expansion software (AVEVA) avec marges supérieures."],
+"LR":["Spécialiste infrastructure électrique du bâtiment (interrupteurs, prises, data centers), modèle bolt-on M&A discipliné.","Croissance organique +5%, data centers +20% (15% du CA), résidentiel/tertiaire neutre. Marges stables haut de gamme.","23x PE = juste prix vu la qualité de l'exécution et la régularité de la croissance.","Cycle bâtiment en ralentissement (Europe, US), pricing matières premières (cuivre), risque exécution M&A.","Acquisition data center accelerator, exposition AI infrastructure renforcée, traction tertiaire haut de gamme."],
+"DG":["Concessions autoroutes (ASF) + aéroports + Vinci Energies + Vinci Construction. Cash machine concessions, modèle ROIC élevé.","Trafic autoroutes +1-2%, aéroports en pleine récupération post-Covid (+8%), croissance organique Énergies +10%.","12x PE = décote injustifiée. Marché ne valorise pas correctement les concessions à cash-flow long-terme garanti.","Régulation autoroutes (renégociation politique 2027), exposition cycle construction, taxe Macron 2024 sur autoroutes.","Atteinte trafic 2019 sur aéroports, M&A Cobra (Espagne), deal sur la régulation autoroutière post-élections."],
+"SGO":["Pivot stratégique vers la rénovation énergétique (isolation, plâtre), cession des distributions, marges en hausse structurelle.","Marge ROP 11% (vs 7% historique), ROIC 15%, exposition rénovation énergétique = secular trend en Europe.","12x PE = décote vs nouveau profil de qualité. Marché tarde à reprendre l'exécution exemplaire de Brachet.","Cycle construction US ralentit (taux d'intérêt), prix énergie (gaz pour le verre), exposition Russie résiduelle.","Atteinte 12%+ marge ROP, capital markets day, M&A en isolation (acquisition US potentielle)."],
+"ALO":["Leader européen rail (TGV, métros, signalisation), digestion réussie de Bombardier. Décarbonation transport = mégatrend.","Carnet de commandes record (90Mds€), désendettement post-augmentation de capital 2024 réussi, FCF en accélération.","18x PE = re-rating en cours. Marché commence à donner crédit au turnaround mais reste prudent sur l'exécution.","Exécution contrats Bombardier (Aventra UK, problèmes qualité), capex H2 train, concurrence chinoise (CRRC).","FCF positif récurrent, contrats SNCF prolongés, contrat majeur Inde/Moyen-Orient (Riyad, Mumbai)."],
+"MT":["N°1 acier hors-Chine, intégration mines de fer (50% des besoins). Pari décarbonation (DRI/EAF) coûteux mais nécessaire.","EBITDA/tonne en chute (cycle baissier), surcapacités chinoises massives, prix acier US -25% depuis pic 2024.","5x PE = pricing très bas mais value trap historique. Marché ne croit plus aux décennies de cycle haussier passé.","Surcapacité chinoise prolongée, dumping, exposition Brésil/Inde (Tata Steel JV), risque écologique.","Tarifs douaniers US/UE renforcés, plan décarbonation crédibilisé (subventions), rachat d'actions massif."],
+"TTE":["Major intégré multi-énergies, pivot ENR (10% capex), exposition LNG forte (Mozambique, USA), dividende solide 7.3%.","Production stable, prix Brent vers $70-75, marges raffinage normalisées. Cash-flow soutient dividende + rachats massifs.","8x PE + dividende 7.3% = prix d'une dépréciation des réserves long-terme. Marché valorise faiblement le pivot ENR.","Transition énergétique accélérée, exposition Russie (litiges en cours), prix Brent en baisse structurelle.","Mise en service Mozambique LNG (multi-Mds€), Sépia/Mero brésilien, listing US (NYSE) pour réduire la décote."],
+"ENGI":["Utility intégrée gaz/électricité/ENR, sortie du nucléaire belge, pivot ENR + réseaux régulés.","EBITDA stable post-2022 (pic crise gaz), dividende 5.9% maintenu, ROIC en restoration progressive.","7x PE = décote sectorielle, marché ne croit pas à la rentabilité long-terme de l'ENR.","Volatilité prix gaz (encore 30% du CA), exposition régulation européenne, capex ENR à rentabilité longue.","Cessions actifs non-stratégiques (Suez Eau), contrats data centers (PPA long-terme), retour normalisé prix gaz."],
+"VIE":["N°1 mondial eau et déchets, fusion Suez digérée (synergies 500M€), exposition économie circulaire structurelle.","Croissance organique +5%, synergies en cours de réalisation (60% atteintes), ROIC en hausse vers 9%.","15x PE = décote vs profil. Marché commence à donner crédit aux synergies mais reste prudent sur l'exécution.","Exécution Suez (intégration culturelle), exposition cycle industriel (déchets), capex décarbonation (incinérateurs).","Atteinte 100% synergies Suez, capital markets day 2026, contrats data centers (refroidissement à eau)."],
+"ORA":["Opérateur télécom européen + Afrique + MEA. Cession activités d'enterprise (OBS), focus retail consumer.","ARPU stable Europe, croissance Afrique +8%, FCF en restoration. Désendettement progressif depuis 2022.","11x PE + dividende 4.2% = décote sectorielle. Marché doute de la croissance long-terme dans un secteur ultra-concurrentiel.","Pression réglementaire roaming, capex 5G/fibre encore élevé, concurrence en France (Free, Bouygues Tel).","Stabilisation ARPU France (consolidation Free?), deal towers Afrique (cession partielle), simplification portefeuille."],
+"PUB":["N°3 mondial publicité avec différenciateur Epsilon (data/CRM), positionnement transformation digitale clients.","Croissance organique +5-6% (vs +2-3% pour pairs Omnicom/IPG), marges 18% maintenues, gains de parts visibles depuis 3 ans.","14x PE = juste prix vu la dynamique supérieure aux pairs. Pas de prime de qualité encore intégrée.","Cycle pub US ralentit (tech, retail), IA gen menace les agences créatives, perte clients tech (Meta, Google).","Outperformance vs Omnicom/IPG dans les chiffres trimestriels, M&A data, contrats GenAI agency (Microsoft, Salesforce)."],
+"BNP":["Banque universelle européenne, leader BFI continental, retail France/Italie/Belgique solide, gestion d'actifs (BNPP AM 700Mds€).","ROE 9% sur le cycle, NII stables, coût du risque normalisé (35 bps). CET1 13% confortable. Action +3% le 28/04 sur annonce rachat.","7x PE + dividende 6.3% (€5.16/action confirmé) = décote sectorielle injustifiée. Yield total >10% avec rachats.","Récession Europe, normalisation taux (NII en baisse mécanique), exposition Italie (politique).","Atteinte ROTE 12% (objectif plan stratégique), autorisations rachats supplémentaires, deal Axa IM (gestion actifs)."],
+"ACA":["Banque mutualiste française (Caisses Régionales), leader retail France, BFI (CACIB), assurance (Crédit Agricole Assurances).","ROE 11%, dividende 6.2% sécurisé et croissant, capital très solide CET1 17%. Surperformance régulière vs BNP/SG.","7x PE = décote modeste vs qualité. Profil de rendement attractif sans premium pour la qualité d'exécution.","Assurance vie (taux d'intérêt), exposition immobilier français, complexité structurelle (Caisses).","Acquisition stratégique en assurance (deal italien rumored), simplification portefeuille, retour cash supplémentaire."],
+"GLE":["Banque universelle française, exposition CIB (Equity Derivatives leader mondial), retail France et international (Boursorama).","Action doublée vs creux 2024 (€33 → €69). ROE en restauration vers 9%, plan stratégique en exécution sous Krupa.","8x PE = décote vs BNP qui se referme. Marché commence à donner crédit au turnaround.","Échec plan stratégique sous Krupa, dépréciation Russie résiduelle, normalisation taux pénalise le NII.","Atteinte ROE 9-10%, IPO Boursorama (potentielle, valorisée 5Mds€+), retour rachats massifs en 2026."],
+"CS":["N°2 assurance européen, équilibré dommages/vie/santé, gestion d'actifs (AXA IM 850Mds€).","Combined ratio 92% (excellent), croissance brute en hausse, ROE 13%, dividende solide 5.4%.","9x PE = décote sectorielle. Marché ne donne pas crédit à la qualité du combined ratio (best-in-class européen).","Catastrophes naturelles (réchauffement climatique), exposition cycle equity (gestion actifs), taux d'intérêt.","Cession AXA IM (potentielle, deal BNP rumored), retour cash augmenté, capital markets day 2026."],
+"URW":["Foncière commerciale premium (Forum des Halles, Carrousel du Louvre, Westfield UK), désendettement post-Westfield US.","Loyers stables, valeur d'actifs encore en repli (-5% en 2025), désendettement de 5Mds€ en 3 ans réussi.","14x PE / 0.4x BV = pricing massif d'une décote durable. Dividende suspendu depuis 2020, pas de catalyseur visible.","E-commerce (Amazon), valeur d'actifs encore en baisse, refinancement cher (taux structurellement élevés).","Reprise dividende (catalyseur majeur), cession Westfield UK (deal en cours), stabilisation valeurs d'actifs."],
+"EN":["Holding diversifié : construction, télécom (Bouygues Telecom), médias (TF1), routes (Colas), services énergétiques (Equans).","Bouygues Tel +4% organique, construction stable, TF1 en repli structurel. Décote sum-of-parts persistante 30%.","11x PE + dividende 5.1% = décote vs sum-of-parts. Profil de rendement attractif mais pas de catalyseur visible.","Cycle construction (Colas), concurrence télécom (Free, Iliad), TF1 (audience en chute structurelle).","Spin-off Equans/Colas (à terme), deal télécom (rapprochement Free?), simplification du périmètre."],
+"TEP":["Leader mondial des centres de relation client externalisés (CX). Modèle pression au volume, pricing modeste.","Croissance org -2% en 2025 (clients tech sortent), marges en chute (15% vs 20%), pression IA gen sur le coeur de métier.","7x PE = pricing d'une obsolescence partielle. Marché doute du modèle face à l'automatisation IA.","IA gen automate les tâches simples (40% du volume actuel), perte clients tech (Meta, Google), M&A digestion (Majorel).","Stabilisation organique (point bas), plan de transformation IA (offre hybride), cession Specialized (deal annoncé)."],
+"ERF":["Leader mondial laboratoires de tests (alimentaire, pharma, environnemental), modèle bolt-on M&A, intégration tech.","Croissance org +3% (vs +5-7% historique), marges sous pression, intégrations passées coûteuses (700+ acquisitions).","15x PE = pricing du ralentissement. Décote vs leaders TIC (BVI 21x, SGS 23x) injustifiée si croissance revient.","Comparaison difficile post-Covid (tests Covid loin derrière), dette élevée (3.5x EBITDA), qualité de l'M&A questionnée.","Reprise pharma testing (catalyseur principal), M&A digérée (réintégration progressive), retour à la croissance >5%."],
+"BVI":["Leader mondial Testing, Inspection, Certification (TIC), modèle low capex, ROIC élevé, exposition économie réelle diversifiée.","Croissance org +5%, marges stables 17%, ROIC 28% (best-in-class secteur).","21x PE = juste prix vu la qualité. Pas de catalyseur fort mais profil défensif solide pour traverser un ralentissement.","Cycle économique global (industrie, conso), pricing pression sur certains segments commodités.","M&A en building & infrastructure, contrats certification durabilité (CSRD européenne), expansion data center inspection."]
+};
+
+const KEYS = ["ticker","name","sector","product","color","icon","price","change","mcap","pe","roe","dy","debt","ebMargin","rsi","signal","obvTrend","techNote"];
+const stocks = STOCKS.map(arr => { const o={}; KEYS.forEach((k,i)=>o[k]=arr[i]); return o; });
+stocks.forEach(s => { s.bullets = BULLETS[s.ticker] || []; });
+
+// Compute technical levels procedurally from price + signal
+function computeLevels(s){
+  const p = s.price;
+  if (s.signal === "buy") {
+    s.support = p * 0.95; s.resistance = p * 1.06;
+    s.entry = p * 1.005; s.sl = p * 0.93;
+    s.tp1 = p * 1.09; s.tp2 = p * 1.16; s.tp3 = p * 1.25;
+  } else if (s.signal === "sell") {
+    s.support = p * 0.92; s.resistance = p * 1.04;
+    s.entry = p * 1.04; s.sl = p * 1.10;
+    s.tp1 = p * 0.91; s.tp2 = p * 0.84; s.tp3 = p * 0.77;
+  } else {
+    s.support = p * 0.94; s.resistance = p * 1.06;
+    s.entry = p * 1.01; s.sl = p * 0.94;
+    s.tp1 = p * 1.07; s.tp2 = p * 1.13; s.tp3 = p * 1.20;
+  }
+}
+stocks.forEach(computeLevels);
+
+function gen(seed, signal, base) {
+  let r = seed * 9301 + 49297;
+  function rnd(){ r = (r * 1103515245 + 12345) & 0x7fffffff; return (r / 0x7fffffff); }
+  const N = 28;
+  const prices = [], obv = [];
+  let p = base * (signal==="buy" ? 1.06 : signal==="sell" ? 0.95 : 1.02);
+  let o = 100;
+  for (let i = 0; i < N; i++){
+    let trend;
+    if (signal==="buy") trend = i < N/2 ? -0.55 : 0.65;
+    else if (signal==="sell") trend = i < N/2 ? 0.45 : -0.55;
+    else trend = (rnd()-0.5) * 0.4;
+    const noise = (rnd()-0.5) * 1.4;
+    p = p * (1 + (trend + noise) / 100);
+    prices.push(p);
+    const dp = i > 0 ? prices[i] - prices[i-1] : 0;
+    const vol = 0.7 + rnd()*0.7;
+    o += (dp > 0 ? 1 : -1) * vol * 5.5;
+    if (signal==="buy" && i >= Math.floor(N/2) && i <= Math.floor(N*0.7)) o = Math.max(o, 78);
+    if (signal==="sell" && i >= Math.floor(N/2) && i <= Math.floor(N*0.7)) o = Math.min(o, 122);
+    obv.push(o);
+  }
+  return { prices, obv };
+}
+stocks.forEach((s, i) => { const g = gen(i+1, s.signal, s.price); s.prices = g.prices; s.obv = g.obv; });
+
+const SIGNAL_LABEL = { buy:"Achat", hold:"Neutre", sell:"Vente" };
+const TREND_LABEL = { up:"OBV ↗", flat:"OBV →", down:"OBV ↘" };
+const BULLET_LABELS = ["Narrative","Momentum","Pricé par le marché","Risques","Catalyseurs"];
+const BULLET_CLASSES = ["nar","mom","pri","ris","cat"];
+
+function fmt(n, dec){ if(typeof n!=="number") return "—"; if(dec===undefined) dec = n<10?2:n<100?1:0; return n.toLocaleString("fr-FR",{minimumFractionDigits:dec,maximumFractionDigits:dec}); }
+function fmtPrice(p){ return fmt(p) + "€"; }
+function fmtChange(c){ const sign = c>=0?"+":""; return sign + fmt(c,1) + "%"; }
+function pctGain(target, entry){ return ((target/entry - 1) * 100); }
+
+function logoEl(s){ return '<div class="logo" style="background:'+s.color+'">'+s.ticker+'</div>'; }
+
+function sparkSvg(prices, signal){
+  const min = Math.min(...prices), max = Math.max(...prices);
+  const range = max - min || 1;
+  const W = 100, H = 32;
+  const pts = prices.map((p, i) => {
+    const x = (i / (prices.length-1)) * W;
+    const y = H - ((p - min) / range) * (H - 4) - 2;
+    return x.toFixed(1) + "," + y.toFixed(1);
+  }).join(" ");
+  const color = signal==="buy" ? "#0F6E56" : signal==="sell" ? "#A32D2D" : "#888780";
+  const fill = signal==="buy" ? "rgba(29,158,117,0.1)" : signal==="sell" ? "rgba(226,75,74,0.1)" : "rgba(150,150,150,0.08)";
+  const fillPts = "0," + H + " " + pts + " " + W + "," + H;
+  return '<svg class="spark" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none"><polygon points="'+fillPts+'" fill="'+fill+'"/><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.5"/></svg>';
+}
+
+function cardHtml(s){
+  return '<div class="card" data-ticker="'+s.ticker+'">'
+    + '<div class="card-h">' + logoEl(s)
+    + '<div class="meta"><div class="nm">'+s.name+'</div><div class="sec">'+s.sector+'</div></div>'
+    + '</div>'
+    + '<div class="card-pr"><span class="p">'+fmtPrice(s.price)+'</span>'
+    + '<span class="ch '+(s.change>=0?"up":"dn")+'">'+fmtChange(s.change)+'</span></div>'
+    + sparkSvg(s.prices, s.signal)
+    + '<div style="display:flex;align-items:center;justify-content:space-between">'
+    +   '<span class="signal '+s.signal+'"><span class="dot '+s.signal+'"></span>'+SIGNAL_LABEL[s.signal]+'</span>'
+    +   '<span class="signal-rsi">RSI '+s.rsi+'</span>'
+    + '</div>'
+    + '</div>';
+}
+
+function summary(filtered){
+  const buy = filtered.filter(s=>s.signal==="buy").length;
+  const hold = filtered.filter(s=>s.signal==="hold").length;
+  const sell = filtered.filter(s=>s.signal==="sell").length;
+  const avgChange = filtered.length ? filtered.reduce((a,s)=>a+s.change,0) / filtered.length : 0;
+  return '<div class="tile"><div class="l">Valeurs</div><div class="v">'+filtered.length+'</div></div>'
+    + '<div class="tile buy"><div class="l">Signal achat</div><div class="v">'+buy+'</div></div>'
+    + '<div class="tile hold"><div class="l">Neutre</div><div class="v">'+hold+'</div></div>'
+    + '<div class="tile sell"><div class="l">Signal vente</div><div class="v">'+sell+'</div></div>'
+    + '<div class="tile"><div class="l">Variation moy.</div><div class="v '+(avgChange>=0?"up":"dn")+'" style="font-size:18px">'+fmtChange(avgChange)+'</div></div>';
+}
+
+function getFiltered(){
+  const q = document.getElementById("search").value.toLowerCase().trim();
+  const sec = document.getElementById("fSector").value;
+  const sig = document.getElementById("fSignal").value;
+  const sort = document.getElementById("fSort").value;
+  let arr = stocks.filter(s => {
+    if (q && !(s.ticker.toLowerCase().includes(q) || s.name.toLowerCase().includes(q))) return false;
+    if (sec && s.sector !== sec) return false;
+    if (sig && s.signal !== sig) return false;
+    return true;
+  });
+  if (sort === "alpha") arr.sort((a,b)=>a.name.localeCompare(b.name));
+  else if (sort === "rsi-desc") arr.sort((a,b)=>b.rsi-a.rsi);
+  else if (sort === "rsi-asc") arr.sort((a,b)=>a.rsi-b.rsi);
+  else if (sort === "ch-desc") arr.sort((a,b)=>b.change-a.change);
+  else if (sort === "ch-asc") arr.sort((a,b)=>a.change-b.change);
+  else if (sort === "mcap-desc") arr.sort((a,b)=>b.mcap-a.mcap);
+  else { const order = {buy:0,hold:1,sell:2}; arr.sort((a,b)=>order[a.signal]-order[b.signal] || b.mcap-a.mcap); }
+  return arr;
+}
+
+function render(){
+  const arr = getFiltered();
+  document.getElementById("summary").innerHTML = summary(arr);
+  document.getElementById("grid").innerHTML = arr.map(cardHtml).join("");
+  document.getElementById("hdrcount").textContent = arr.length + " / " + stocks.length + " valeurs";
+  document.querySelectorAll(".card").forEach(c => {
+    c.addEventListener("click", () => openDetail(c.dataset.ticker));
+  });
+}
+
+let charts = [];
+function destroyCharts(){ charts.forEach(c => c.destroy()); charts = []; }
+
+function bulletsHtml(bullets){
+  if (!bullets || bullets.length === 0) return "";
+  return '<ul class="bullets">' + bullets.map((b, i) =>
+    '<li><div class="lbl '+BULLET_CLASSES[i]+'">'+BULLET_LABELS[i]+'</div><div class="txt">'+b+'</div></li>'
+  ).join("") + '</ul>';
+}
+
+function detailHtml(s){
+  const r1 = ((s.tp1 - s.entry) / Math.abs(s.entry - s.sl)).toFixed(1);
+  const r2 = ((s.tp2 - s.entry) / Math.abs(s.entry - s.sl)).toFixed(1);
+  const r3 = ((s.tp3 - s.entry) / Math.abs(s.entry - s.sl)).toFixed(1);
+  const isShort = s.signal === "sell";
+  const slPct = isShort ? pctGain(s.sl, s.entry) : pctGain(s.sl, s.entry);
+  return '<div class="panel-h">' + logoEl(s)
+    + '<div><h2>'+s.name+'</h2><div class="sec">'+s.ticker+' · '+s.sector+'</div></div>'
+    + '<div class="pr"><span class="p">'+fmtPrice(s.price)+'</span><span class="ch '+(s.change>=0?"up":"dn")+'">'+fmtChange(s.change)+'</span></div>'
+    + '<button class="close" id="closeBtn" aria-label="Fermer">×</button>'
+    + '</div>'
+    + '<div class="tabs">'
+    +   '<button class="tab active" data-tab="fund">Fondamentaux</button>'
+    +   '<button class="tab" data-tab="tech">Technique &amp; OBV</button>'
+    +   '<button class="tab" data-tab="plan">Plan de trading</button>'
+    + '</div>'
+    + '<div class="section active" data-section="fund">'
+    +   '<div class="illus"><div class="icon-wrap" style="background:'+s.color+'15;color:'+s.color+'"><svg viewBox="0 0 24 24">'+ICONS[s.icon]+'</svg></div>'
+    +     '<div class="txt"><div class="pn">'+s.product+'</div><div class="pd">Capi : '+fmt(s.mcap,0)+' Md€ · '+s.sector+'</div></div></div>'
+    +   '<div class="kpi-grid">'
+    +     '<div class="kpi"><div class="l">P/E</div><div class="v">'+fmt(s.pe,0)+'x</div></div>'
+    +     '<div class="kpi"><div class="l">ROE</div><div class="v">'+fmt(s.roe,0)+'%</div></div>'
+    +     '<div class="kpi"><div class="l">Marge EBITDA</div><div class="v">'+fmt(s.ebMargin,0)+'%</div></div>'
+    +     '<div class="kpi"><div class="l">Dividende</div><div class="v">'+fmt(s.dy,1)+'%</div></div>'
+    +     '<div class="kpi"><div class="l">Dette/EBITDA</div><div class="v">'+fmt(s.debt,1)+'x</div></div>'
+    +     '<div class="kpi"><div class="l">Capi.</div><div class="v">'+fmt(s.mcap,0)+' Md€</div></div>'
+    +   '</div>'
+    +   bulletsHtml(s.bullets)
+    + '</div>'
+    + '<div class="section" data-section="tech">'
+    +   '<div class="tech-tags">'
+    +     '<span class="tag '+(s.rsi>70?"down":s.rsi<30?"up":"flat")+'"><span class="l">RSI</span> '+s.rsi+'</span>'
+    +     '<span class="tag '+s.obvTrend+'">'+TREND_LABEL[s.obvTrend]+'</span>'
+    +     '<span class="tag"><span class="l">Support</span> '+fmtPrice(s.support)+'</span>'
+    +     '<span class="tag"><span class="l">Résistance</span> '+fmtPrice(s.resistance)+'</span>'
+    +     '<span class="tag '+s.signal+'"><span class="dot '+s.signal+'"></span>'+SIGNAL_LABEL[s.signal]+'</span>'
+    +   '</div>'
+    +   levelBarHtml(s)
+    +   '<div class="chart-wrap">'
+    +     '<h4>Prix · 28 séances</h4><div class="sub">Pattern illustratif basé sur le signal — pas l\'historique réel</div>'
+    +     '<div class="chart-box"><canvas id="chartPrice" role="img" aria-label="Graphique de prix sur 28 séances avec niveaux clés">Évolution du prix sur 28 séances.</canvas></div>'
+    +   '</div>'
+    +   '<div class="chart-wrap">'
+    +     '<h4>OBV · On-Balance Volume</h4><div class="sub">Pattern illustratif — pour signaux OBV réels, utiliser TradingView</div>'
+    +     '<div class="chart-box"><canvas id="chartObv" role="img" aria-label="Graphique OBV sur 28 séances">Évolution de l\'OBV sur 28 séances.</canvas></div>'
+    +   '</div>'
+    +   '<div class="note tech"><span class="lbl">Lecture technique</span>'+s.techNote+'</div>'
+    +   '<div class="note warn"><span class="lbl">Avertissement OBV</span>L\'OBV affiché est généré procéduralement à partir du signal pour illustrer le pattern attendu. Sans accès tick-data live, l\'OBV réel ne peut pas être calculé. Pour un signal OBV opérationnel, croiser avec TradingView, Boursorama Pro ou ProRealTime.</div>'
+    + '</div>'
+    + '<div class="section" data-section="plan">'
+    +   '<div class="plan-row">'
+    +     '<div class="plan-cell entry"><div class="l">'+(isShort?"Entrée short":"Entrée long")+'</div><div class="v">'+fmtPrice(s.entry)+'</div></div>'
+    +     '<div class="plan-cell sl"><div class="l">Stop loss</div><div class="v">'+fmtPrice(s.sl)+' <span style="font-size:11px;font-weight:400">('+fmt(slPct,1)+'%)</span></div></div>'
+    +   '</div>'
+    +   '<div class="tp-row">'
+    +     '<div class="tp"><div class="l">TP1 · R '+r1+'</div><div class="v">'+fmtPrice(s.tp1)+'</div><div class="gain">'+fmtChange(pctGain(s.tp1,s.entry))+'</div></div>'
+    +     '<div class="tp"><div class="l">TP2 · R '+r2+'</div><div class="v">'+fmtPrice(s.tp2)+'</div><div class="gain">'+fmtChange(pctGain(s.tp2,s.entry))+'</div></div>'
+    +     '<div class="tp"><div class="l">TP3 · R '+r3+'</div><div class="v">'+fmtPrice(s.tp3)+'</div><div class="gain">'+fmtChange(pctGain(s.tp3,s.entry))+'</div></div>'
+    +   '</div>'
+    +   '<div class="note"><span class="lbl">Déclencheur OBV (à valider sur ton chart)</span>'+
+        (s.signal==="buy"
+          ? "Entrer dès que l'OBV fait un higher low pendant que le prix teste "+fmtPrice(s.support)+", OU casse son plus haut 20j avec le prix au-dessus de "+fmtPrice(s.resistance)+"."
+          : s.signal==="sell"
+          ? "Shorter dès que l'OBV fait un lower high sur tout rebond vers "+fmtPrice(s.resistance)+", OU casse son support en même temps que le prix sous "+fmtPrice(s.support)+"."
+          : "Pas de signal franc. Attendre une divergence OBV claire ou une cassure de range avant toute prise de position.")
+        +'</div>'
+    +   '<div class="note tech"><span class="lbl">Invalidation</span>Sortir intégralement si l\'OBV invalide la thèse (lower low pour un long, higher high pour un short) ou si le stop '+fmtPrice(s.sl)+' est touché en clôture.</div>'
+    +   '<div class="note warn"><span class="lbl">Niveaux calculés</span>Les niveaux d\'entrée, stop et TP sont calculés à partir du prix réel (28/04/26) avec une formule procédurale standard (95-107% sur S/R, 93-125% sur SL/TP). Pour des niveaux affinés, croiser avec une analyse technique sur ton broker.</div>'
+    + '</div>';
+}
+
+function levelBarHtml(s){
+  const lvls = [{p:s.sl,c:"#A32D2D",lbl:"SL",x:fmtPrice(s.sl)},
+                {p:s.support,c:"#888780",lbl:"S",x:fmtPrice(s.support)},
+                {p:s.price,c:"#185FA5",lbl:"Spot",x:fmtPrice(s.price)},
+                {p:s.resistance,c:"#854F0B",lbl:"R",x:fmtPrice(s.resistance)},
+                {p:s.tp1,c:"#3B6D11",lbl:"TP1",x:fmtPrice(s.tp1)},
+                {p:s.tp2,c:"#3B6D11",lbl:"TP2",x:fmtPrice(s.tp2)},
+                {p:s.tp3,c:"#3B6D11",lbl:"TP3",x:fmtPrice(s.tp3)}];
+  const min = Math.min(...lvls.map(l=>l.p)), max = Math.max(...lvls.map(l=>l.p));
+  const range = max - min || 1;
+  return '<div class="lvl-bar"><div class="track"></div>' + lvls.map(l => {
+    const left = ((l.p - min) / range) * 92 + 2;
+    return '<div class="marker" style="left:'+left.toFixed(1)+'%"><div class="line" style="background:'+l.c+'"></div><div class="lbl" style="color:'+l.c+'">'+l.lbl+'</div><div class="x">'+l.x+'</div></div>';
+  }).join("") + '</div>';
+}
+
+function openDetail(ticker){
+  const s = stocks.find(x => x.ticker === ticker);
+  if (!s) return;
+  destroyCharts();
+  const panel = document.getElementById("panel");
+  panel.innerHTML = detailHtml(s);
+  document.getElementById("overlay").classList.add("open");
+  panel.classList.add("open");
+  panel.scrollTop = 0;
+  document.getElementById("closeBtn").addEventListener("click", closeDetail);
+  panel.querySelectorAll(".tab").forEach(t => t.addEventListener("click", e => {
+    panel.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    panel.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+    e.target.classList.add("active");
+    panel.querySelector('.section[data-section="'+e.target.dataset.tab+'"]').classList.add("active");
+    if (e.target.dataset.tab === "tech") setTimeout(() => drawCharts(s), 30);
+  }));
+}
+function closeDetail(){
+  document.getElementById("overlay").classList.remove("open");
+  document.getElementById("panel").classList.remove("open");
+  destroyCharts();
+}
+document.getElementById("overlay").addEventListener("click", closeDetail);
+
+function drawCharts(s){
+  destroyCharts();
+  const labels = s.prices.map((_,i) => "J"+(i+1));
+  const supportLine = s.prices.map(()=>s.support);
+  const resistanceLine = s.prices.map(()=>s.resistance);
+  const entryLine = s.prices.map(()=>s.entry);
+  const slLine = s.prices.map(()=>s.sl);
+  const priceColor = s.signal==="buy"?"#0F6E56":s.signal==="sell"?"#A32D2D":"#185FA5";
+  const priceFill = s.signal==="buy"?"rgba(29,158,117,0.10)":s.signal==="sell"?"rgba(226,75,74,0.10)":"rgba(24,95,165,0.08)";
+  const ctx1 = document.getElementById("chartPrice");
+  if (ctx1) charts.push(new Chart(ctx1, {
+    type:"line",
+    data:{labels, datasets:[
+      {label:"SL",data:slLine,borderColor:"#E24B4A",borderWidth:1,borderDash:[3,3],pointRadius:0,fill:false},
+      {label:"Support",data:supportLine,borderColor:"#888780",borderWidth:1,borderDash:[2,3],pointRadius:0,fill:false},
+      {label:"Résistance",data:resistanceLine,borderColor:"#BA7517",borderWidth:1,borderDash:[2,3],pointRadius:0,fill:false},
+      {label:"Entrée",data:entryLine,borderColor:"#3B6D11",borderWidth:1,borderDash:[5,3],pointRadius:0,fill:false},
+      {label:"Prix",data:s.prices.map(p=>Math.round(p*100)/100),borderColor:priceColor,backgroundColor:priceFill,borderWidth:2,pointRadius:0,fill:true,tension:0.25}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:"index",intersect:false,
+        callbacks:{label:(c)=>c.dataset.label==="Prix"?"Prix : "+fmt(c.parsed.y)+"€":null,filter:(it)=>it.dataset.label==="Prix"}}},
+      scales:{y:{ticks:{font:{size:10},callback:(v)=>fmt(v)+"€"},grid:{color:"rgba(0,0,0,0.05)"}},
+              x:{ticks:{font:{size:10},autoSkip:true,maxTicksLimit:7},grid:{display:false}}}
+    }
+  }));
+  const ctx2 = document.getElementById("chartObv");
+  const obvColor = s.obvTrend==="up"?"#3B6D11":s.obvTrend==="down"?"#A32D2D":"#534AB7";
+  const obvFill = s.obvTrend==="up"?"rgba(59,109,17,0.10)":s.obvTrend==="down"?"rgba(163,45,45,0.10)":"rgba(83,74,183,0.10)";
+  if (ctx2) charts.push(new Chart(ctx2, {
+    type:"line",
+    data:{labels, datasets:[
+      {label:"OBV",data:s.obv.map(v=>Math.round(v)),borderColor:obvColor,backgroundColor:obvFill,borderWidth:2,pointRadius:0,fill:true,tension:0.25}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{mode:"index",intersect:false,callbacks:{label:(c)=>"OBV : "+Math.round(c.parsed.y)}}},
+      scales:{y:{ticks:{font:{size:10}},grid:{color:"rgba(0,0,0,0.05)"}},
+              x:{ticks:{font:{size:10},autoSkip:true,maxTicksLimit:7},grid:{display:false}}}
+    }
+  }));
+}
+
+const sectors = [...new Set(stocks.map(s=>s.sector))].sort();
+const fSec = document.getElementById("fSector");
+fSec.innerHTML = '<option value="">Tous secteurs</option>' + sectors.map(s=>'<option value="'+s+'">'+s+'</option>').join("");
+["search","fSector","fSignal","fSort"].forEach(id => document.getElementById(id).addEventListener("input", render));
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDetail(); });
+render();
+</script>
+</body>
+</html>
