@@ -117,3 +117,130 @@ Ferme/reouvre l artifact.
 OK decisionHtml(s) deja dans onglet tech
 X Cheatsheet non trouvee, peut-etre deja retiree
 OK HTML mis a jour. Recharge l artifact.
+[main fd550ed] Refresh quotidien 2026-05-07
+ 2 files changed, 121 insertions(+), 2 deletions(-)
+ create mode 100644 refresh.log
+To https://github.com/ahc20/Screener_bourse
+   0fb3355..fd550ed  main -> main
+✓ Push vers GitHub OK — Vercel va redeployer dans ~30s
+=== 15:43:51 Fini ===
+
+=== 2026-05-10 22:22:49 Refresh CAC40 ===
+$MT.PA: possibly delisted; no price data found  (period=1y)
+$STM.PA: possibly delisted; no price data found  (period=1y) (Yahoo error = "No data found, symbol may be delisted")
+$STLA.PA: possibly delisted; no price data found  (period=1y) (Yahoo error = "No data found, symbol may be delisted")
+
+3 Failed downloads:
+['MT.PA']: possibly delisted; no price data found  (period=1y)
+['STM.PA', 'STLA.PA']: possibly delisted; no price data found  (period=1y) (Yahoo error = "No data found, symbol may be delisted")
+
+→ Fetch 40 valeurs CAC40 via yfinance — historique 1 an
+
+→ Téléchargement groupé yf.download(...) sur 1y
+
+  MC    (LVMH                     )    472.70€   -1.17%  256j (2025-05-08 → 2026-05-08)
+  RMS   (Hermès                   )   1661.00€   -2.41%  256j (2025-05-08 → 2026-05-08)
+  OR    (L'Oréal                  )    363.00€   -1.09%  256j (2025-05-08 → 2026-05-08)
+  KER   (Kering                   )    245.90€   -0.36%  256j (2025-05-08 → 2026-05-08)
+  EL    (EssilorLuxottica         )    171.40€   -2.78%  256j (2025-05-08 → 2026-05-08)
+  RI    (Pernod Ricard            )     63.68€   -0.53%  256j (2025-05-08 → 2026-05-08)
+  AI    (Air Liquide              )    175.12€   -0.89%  256j (2025-05-08 → 2026-05-08)
+  AIR   (Airbus                   )    179.88€   -1.94%  256j (2025-05-08 → 2026-05-08)
+  SAF   (Safran                   )    286.30€   -2.88%  256j (2025-05-08 → 2026-05-08)
+  HO    (Thales                   )    227.90€   -3.39%  256j (2025-05-08 → 2026-05-08)
+  STLA  (Stellantis               ) → ERREUR no data
+  RNO   (Renault                  )     28.60€   -8.16%  256j (2025-05-08 → 2026-05-08)
+  ML    (Michelin                 )     31.84€   -0.62%  256j (2025-05-08 → 2026-05-08)
+  BN    (Danone                   )     62.80€   -0.76%  256j (2025-05-08 → 2026-05-08)
+  CA    (Carrefour                )     17.17€   +0.35%  256j (2025-05-08 → 2026-05-08)
+  SAN   (Sanofi                   )     73.10€   -0.87%  256j (2025-05-08 → 2026-05-08)
+  EDEN  (Edenred                  )     21.17€   +0.14%  256j (2025-05-08 → 2026-05-08)
+  CAP   (Capgemini                )    103.45€   -1.38%  256j (2025-05-08 → 2026-05-08)
+  DSY   (Dassault Sys.            )     19.55€   -1.56%  256j (2025-05-08 → 2026-05-08)
+  STM   (STMicro                  ) → ERREUR no data
+  SU    (Schneider                )    272.60€   -0.94%  256j (2025-05-08 → 2026-05-08)
+  LR    (Legrand                  )    156.50€   -0.57%  256j (2025-05-08 → 2026-05-08)
+  DG    (Vinci                    )    128.80€   -2.09%  256j (2025-05-08 → 2026-05-08)
+  SGO   (Saint-Gobain             )     79.18€   -1.25%  256j (2025-05-08 → 2026-05-08)
+  ALO   (Alstom                   )     17.31€   -1.25%  256j (2025-05-08 → 2026-05-08)
+  MT    (ArcelorMittal            ) → ERREUR no data
+  TTE   (TotalEnergies            )     75.80€   +0.70%  256j (2025-05-08 → 2026-05-08)
+  ENGI  (Engie                    )     26.99€   +0.48%  256j (2025-05-08 → 2026-05-08)
+  VIE   (Veolia                   )     35.82€   -0.25%  256j (2025-05-08 → 2026-05-08)
+  ORA   (Orange                   )     17.83€   +0.91%  256j (2025-05-08 → 2026-05-08)
+  PUB   (Publicis                 )     81.30€   -0.51%  256j (2025-05-08 → 2026-05-08)
+  BNP   (BNP Paribas              )     91.55€   -1.81%  256j (2025-05-08 → 2026-05-08)
+  ACA   (Crédit Agricole          )     17.03€   -0.76%  256j (2025-05-08 → 2026-05-08)
+  GLE   (Société Générale         )     69.18€   -0.65%  256j (2025-05-08 → 2026-05-08)
+  CS    (AXA                      )     41.04€   -1.30%  256j (2025-05-08 → 2026-05-08)
+  URW   (Unibail                  )    101.85€   -0.29%  256j (2025-05-08 → 2026-05-08)
+  EN    (Bouygues                 )     50.24€   -1.61%  256j (2025-05-08 → 2026-05-08)
+  TEP   (Teleperformance          )     63.50€   +2.92%  256j (2025-05-08 → 2026-05-08)
+  ERF   (Eurofins                 )     59.34€   -0.64%  256j (2025-05-08 → 2026-05-08)
+  BVI   (Bureau Veritas           )     25.85€   -1.93%  256j (2025-05-08 → 2026-05-08)
+
+✓ 37/40 valeurs récupérées sur 1 an
+✓ Sauvé dans /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/cac40_yahoo_1y.json
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+OK 37 stocks avec full history + dates
+OK REAL_DATA mis a jour
+OK drawCharts deja patche
+
+OK Patch dates+vues applique sur 37 stocks
+OK Vue par defaut : daily 60j ; toggles vers hebdo 40 semaines ou mensuel 12 mois
+
+Ferme/reouvre l artifact pour voir les nouveaux graphiques.
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+OK 37 stocks. 19 avec setup R/R >= 1.5 valide.
+OK REAL_DATA mis a jour avec R/R logique
+
+OK Patch R/R applique :
+  - SL desormais limite a -8% max (vs -5% sous low recent)
+  - TP1 = max(resistance, entry + 2*risque) -> R/R >= 2 garanti
+  - TP2/TP3 = Fibo .382/.618 OU R/R 3/5 (le plus haut)
+  - Si R/R < 1.5 quand meme -> flag INSUFFISANT
+  - 19/37 stocks ont setup valide
+
+Ferme/reouvre l artifact.
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+
+OK Patch coherence v2 applique :
+  - Frise SL/Spot/R/TP1-3 et bloc optimal zone affichent les MEMES valeurs
+  - Spot prix actuel synchronise avec dernier close Yahoo
+  - Bloc 'Triggers d action' avec conditions OBV/MM explicites
+    -> 5 lignes : entree, confirmation OBV, niveau MM, SL, TPs
+
+Ferme/reouvre l artifact.
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+
+OK Patch visuel applique :
+  - Frise des niveaux : labels staggeres sur 2 rangees quand trop proches (plus de chevauchement)
+  - Hauteur frise augmentee a 75px
+  - Legende inline sous le graphique : Prix / MM / Zone / SL / TP
+
+Ferme/reouvre l artifact.
+OK Detection OBV : 37 stocks analyses
+   Repartition : {'plat': 15, 'div_baissiere': 2, 'confirm_baissiere': 6, 'confirm_haussiere': 14}
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+OK REAL_DATA enrichi avec obv_pattern et obv_explanation par ticker
+
+OK Patch OBV pedagogie applique
+  - Pattern OBV detecte automatiquement par stock (37 stocks)
+  - Bloc explicatif personnalise (pas juste theorie generale)
+  - Cheatsheet visuel des 4 patterns OBV en bas
+  - Repartition : {'plat': 15, 'div_baissiere': 2, 'confirm_baissiere': 6, 'confirm_haussiere': 14}
+
+Ferme/reouvre l artifact.
+OK Backup: /Users/ahcene.bensalama/Documents/Claude/Artifacts/cac40-screener-obv/index.backup.20260510_222302.html
+
+OK Patch decision unifiee applique
+  - Bloc 'Decision finale - lecture unique' ajoute en haut des onglets Tech ET Plan
+  - Combine synthese multi-indicateurs ET pattern OBV en UNE recommandation
+  - Niveau de conviction (haute/moyenne/faible) selon convergence
+  - Explication explicite des cas contradictoires
+  - 6 cas geres : convergence (haute), anticipation OBV, contradictions, neutre
+
+Ferme/reouvre l artifact.
+OK decisionHtml(s) deja dans onglet tech
+X Cheatsheet non trouvee, peut-etre deja retiree
+OK HTML mis a jour. Recharge l artifact.
